@@ -7,7 +7,6 @@ from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from pywinauto.application import Application
 from pywinauto import Desktop
 from pywinauto.keyboard import send_keys
 from pywinauto.timings import wait_until
@@ -29,7 +28,7 @@ def get_print_border():
     pyautogui.click(browser_center_x, browser_center_y)
     # 使用 pyautogui 模拟按下 Ctrl + P
     pyautogui.hotkey('ctrl', 'p')
-    time.sleep(30)
+    time.sleep(10)
 
 
 def save_file(path):
@@ -48,19 +47,19 @@ def save_file(path):
     browser_window = Desktop(backend="uia").window(title=browser_window_title)
     browser_window = Desktop(backend="uia").window(title=browser_window_title)
     print_dialog = browser_window.child_window(title="打印", control_type="Pane", found_index=0)
-    print_button = print_dialog.child_window(title="打印", control_type="Button")
+    print_button = print_dialog.child_window(title="保存", control_type="Button")
+    time.sleep(5)
     if not print_button.exists():
         # 如果找不到“打印”按钮，则尝试查找其他可能的控件
-        print_button = print_dialog.child_window(title="打印", control_type="Button", found_index=1)
+        print_button = print_dialog.child_window(title="保存", control_type="Button", found_index=1)
     print_button.click()
     # 等待页面加载完成，保证导出数据不异常
     time.sleep(5)
 
     # 连接到“另存为”对话框
     # 等待“另存为”对话框出现，最多等待60秒
-    wait_until(timeout, 1, lambda: browser_window.child_window(title="将打印输出另存为", control_type="Window").exists())
-    time.sleep(2)
-    save_as_dialog = browser_window.child_window(title="将打印输出另存为", control_type="Window")
+    wait_until(timeout, 1, lambda: browser_window.child_window(title="另存为", control_type="Window").exists())
+    save_as_dialog = browser_window.child_window(title="另存为", control_type="Window")
     # 设置文件夹视图
     # 发送 Alt + D 快捷键激活地址栏
     save_as_dialog.type_keys("%d")
@@ -76,7 +75,7 @@ def save_file(path):
     save_button = save_as_dialog.child_window(title="保存(S)", auto_id="1", control_type="Button")
     save_button.click()
 
-    time.sleep(10)
+    time.sleep(50)
 
 
 
@@ -93,10 +92,6 @@ def handover_new_handles(original_window):
 
 # 设置 Chrome 选项
 chrome_options = Options()
-# chrome_options.add_argument('--headless')
-# chrome_options.add_argument('--disable-gpu')
-# chrome_options.add_argument('--print-to-pdf-no-header')
-# chrome_options.add_argument('--print-to-pdf=D:/PycharmProjects/spider-yuque-doc/kafka.pdf')  # 指定输出 PDF 的文件名
 browser_path = input("Enter the browser path")
 chrome_options.binary_location = browser_path
 
