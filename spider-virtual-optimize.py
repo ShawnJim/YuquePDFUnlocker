@@ -29,7 +29,7 @@ def get_print_border():
     pyautogui.click(browser_center_x, browser_center_y)
     # 使用 pyautogui 模拟按下 Ctrl + P
     pyautogui.hotkey('ctrl', 'p')
-    pyautogui.sleep(5)
+    time.sleep(30)
 
 
 def save_file(path):
@@ -42,21 +42,22 @@ def save_file(path):
     print('页面标题：', title)
     # 使用 Selenium 模拟按下 Ctrl + P 打开打印对话框
     get_print_border()
-    # 假设你已经打开了打印对话框
-    # 使用 pywinauto 连接到打印对话框
-    app = Application(backend="uia").connect(title_re="打印", timeout=timeout)
-    # 找到“打印”窗口
-    print_dialog = app.window(title="打印")
-    # 点击“打印”按钮
-    print_dialog.child_window(title="打印", control_type="Button").click()
+    # 等待打印对话框出现
+    browser_window_title = driver.title + " - Google Chrome for Testing"
+    wait_until(timeout, 1, lambda: Desktop(backend="uia").window(title=browser_window_title).exists())
+    browser_window = Desktop(backend="uia").window(title=browser_window_title)
+    browser_window = Desktop(backend="uia").window(title=browser_window_title)
+    print_dialog = browser_window.child_window(title="打印", control_type="Pane", found_index=0)
+    print_button = print_dialog.child_window(title="打印", control_type="Button")
+    if not print_button.exists():
+        # 如果找不到“打印”按钮，则尝试查找其他可能的控件
+        print_button = print_dialog.child_window(title="打印", control_type="Button", found_index=1)
+    print_button.click()
     # 等待页面加载完成，保证导出数据不异常
-    time.sleep(30)
+    time.sleep(5)
 
     # 连接到“另存为”对话框
     # 等待“另存为”对话框出现，最多等待60秒
-    browser_window_title = driver.title + " - Google Chrome"
-    wait_until(timeout, 1, lambda: Desktop(backend="uia").window(title=browser_window_title).exists())
-    browser_window = Desktop(backend="uia").window(title=browser_window_title)
     wait_until(timeout, 1, lambda: browser_window.child_window(title="将打印输出另存为", control_type="Window").exists())
     time.sleep(2)
     save_as_dialog = browser_window.child_window(title="将打印输出另存为", control_type="Window")
@@ -78,6 +79,7 @@ def save_file(path):
     time.sleep(10)
 
 
+
 def handover_new_handles(original_window):
     # 等待新窗口出现
     WebDriverWait(driver, timeout).until(EC.number_of_windows_to_be(2))
@@ -95,6 +97,8 @@ chrome_options = Options()
 # chrome_options.add_argument('--disable-gpu')
 # chrome_options.add_argument('--print-to-pdf-no-header')
 # chrome_options.add_argument('--print-to-pdf=D:/PycharmProjects/spider-yuque-doc/kafka.pdf')  # 指定输出 PDF 的文件名
+browser_path = input("Enter the browser path")
+chrome_options.binary_location = browser_path
 
 # 初始化 WebDriver
 # 创建 WebDriver 实例，传递 executable_path 参数

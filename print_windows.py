@@ -1,42 +1,41 @@
 from pywinauto import Desktop, findwindows
 from pywinauto.application import Application
+from pywinauto.timings import wait_until
+
+from pywinauto import Desktop
+
 
 
 def printWindows():
+    import re
+    from pywinauto import Desktop
+
     # 获取桌面上所有窗口
-    desktop = Desktop(backend="uia")
+    windows = Desktop(backend="uia").windows()
 
-    # 查找与当前激活的selenium窗口句柄对应的pywinauto窗口
-    browser_windows = findwindows.find_elements(class_name='Chrome_WidgetWin_1')
+    # 假设你知道标题中包含的文字
+    partial_title = "介绍"
 
-    # 筛选出正确的窗口
-    for w_handle in browser_windows:
-        window = desktop.window(handle=w_handle.handle)
-        print(window.window_text())
+    # 通过遍历所有窗口，找到包含这部分标题的窗口
+    for w in windows:
+        if re.search(partial_title, w.window_text(), re.IGNORECASE):
+            browser_window_title = w.window_text()
+            break
 
-# # 打印浏览器窗口的所有直接子窗口的标题
-# for child in browser_window.children():
-#     print(child.window_text())
-
-# 如果找到“另存为”对话框，可以直接与它交互
-# 例如:
-# browser_window_title = "SpringBoot 常见面试题总结 - Google Chrome"
-# browser_window = Desktop(backend="uia").window(title="打印")
-# browser_window.print_control_identifiers()
-# save_as_dialog = browser_window.child_window(title="将打印输出另存为", control_type="Window")
-# save_as_dialog.print_control_identifiers()
-
-# app = Desktop(backend="uia").window(title="打印")
-# app.print_control_identifiers()
+    print(browser_window_title)  # 打印找到的窗口标题
 
 
-# printWindows()
+def print_all():
+    windows = Desktop(backend="uia").windows()
+    for w in windows:
+        print(w.window_text())
 
-from pywinauto import Application
 
-app = Application(backend="uia").connect(title_re=".*Chrome.*", found_index=0)
-print_dialog = app.window(title_re=".*打印.*")
-
-# 假设预览区域是最深层的Pane控件
-# 此处的定位可能需要根据实际Inspect工具观察的结果进行调整
-preview_pane = print_dialog.Pane.child_window(control_type="Pane", found_index=0)
+browser_window = Desktop(backend="uia").window(title="介绍 - Google Chrome for Testing")
+browser_window.print_control_identifiers()
+print_dialog = browser_window.child_window(title="打印", control_type="Pane", found_index=1)
+print_button = print_dialog.child_window(title="打印", control_type="Button")
+if not print_button.exists():
+    # 如果找不到“打印”按钮，则尝试查找其他可能的控件
+    print_button = print_dialog.child_window(title="打印", control_type="Button", found_index=1)
+print_button.click()
