@@ -196,6 +196,7 @@ def process_items_until_done(driver, save_path):
                             wait_for_page_load(driver)
                             save_pdf_by_cdp(driver, save_path, f"{title}")
                             new_data_found = True
+                            collision_counter = 0
                         else:
                             print(f"{title}, 纯标题，无链接")
                     else:
