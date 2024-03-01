@@ -1,17 +1,13 @@
 import os
 import time
-from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import StaleElementReferenceException, TimeoutException
 from pywinauto.application import Application
-from pywinauto.keyboard import send_keys
 from selenium import webdriver
 from selenium.webdriver.support.ui import WebDriverWait
-# 获取PDF数据并保存到文件
 import base64
 
 from tools import fix_title
