@@ -117,8 +117,7 @@ def process_items(driver, save_path):
         try:
             title = item.find_element(By.CLASS_NAME, "catalogTreeItem-module_title_snpKw").text
             print(f"处理: {title}")
-            # 这里可以添加逻辑来决定是否需要保存为PDF
-            # 例如，根据标题或其他条件
+            # 保存pdf
             save_pdf(driver, save_path, f"{title}")
         except StaleElementReferenceException:
             print("元素状态发生变化，跳过。")
@@ -187,11 +186,8 @@ def process_items_until_done(driver, save_path):
                 if title not in data_set:
                     data_set.add(title)
                     new_data_found = True
-                    # 在这里处理每个元素，例如检查是否需要保存为PDF
-                    # 假设我们需要根据某些条件保存PDF
-                    # if "特定条件" in title:  # 替换为实际的条件
                     if file_index >= file_count:
-                        # 假设已经定义了保存PDF的函数
+                        # 保存pdf
                         links = item.find_elements(By.TAG_NAME, "a")
                         if links:
                             print(f"处理: {title}")
