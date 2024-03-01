@@ -28,3 +28,9 @@ python .\spider-virtual-optimize.py
 - pyperclip~=1.8.2
 - selenium~=4.18.1
 - [google for testing](https://googlechromelabs.github.io/chrome-for-testing/)
+
+## 最后
+
+本项目仅供学习交流使用，不得用于任何商业用途
+
+有任何疑问请在 Issues 中讨论沟通
