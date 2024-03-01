@@ -184,6 +184,7 @@ def process_items_until_done(driver, save_path):
                 scroll_into_view(driver, item)
                 title = item.find_element(By.CLASS_NAME, "catalogTreeItem-module_title_snpKw").text
                 if title not in data_set:
+                    collision_counter = 0
                     data_set.add(title)
                     new_data_found = True
                     if file_index >= file_count:
@@ -196,7 +197,6 @@ def process_items_until_done(driver, save_path):
                             wait_for_page_load(driver)
                             save_pdf_by_cdp(driver, save_path, f"{title}")
                             new_data_found = True
-                            collision_counter = 0
                         else:
                             print(f"{title}, 纯标题，无链接")
                     else:
