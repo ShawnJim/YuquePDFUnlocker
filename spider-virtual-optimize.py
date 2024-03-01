@@ -60,13 +60,14 @@ function scrollToBottom(scrollDuration) {
     }, 15);
 }
 
-scrollToBottom(1000);  // 滚动持续时间，单位为毫秒
+scrollToBottom(20000);  // 滚动持续时间，单位为毫秒
 """
 
 def save_pdf_by_cdp(driver, save_path, file_name):
-    time.sleep(20)  # 等待页面加载完成（可根据需要调整时间）
+    time.sleep(10)  # 等待页面加载完成（可根据需要调整时间）
     # 从页首移动到页尾
     driver.execute_script(scroll_script)
+    time.sleep(20)
     # 使用CDP发送打印命令
     result = driver.execute_cdp_cmd("Page.printToPDF", {
         "landscape": False
@@ -159,6 +160,17 @@ def wait_for_page_load(driver, timeout=30):
     )
 
 
+def scroll_tree_to_under(driver):
+    try:
+        # 定位到可滑动的div元素
+        virtual_tree = driver.find_element(By.CLASS_NAME, "lark-virtual-tree")
+        # 使用JavaScript向下滑动
+        scroll_amount = 100  # 滑动的像素数，可以根据需要调整
+        driver.execute_script("arguments[0].scrollTop += arguments[1];", virtual_tree, scroll_amount)
+    except NoSuchElementException:
+        print("滑动异常")
+
+
 def process_items_until_done(driver, save_path):
     """
     循环处理页面上的元素，直到没有新数据。
@@ -168,6 +180,7 @@ def process_items_until_done(driver, save_path):
     file_count = sum([len(files) for r, d, files in os.walk(save_path)])
     # 存储已获取的数据
     data_set = set()
+    collision_counter = 0
     while True:
         items = get_items(driver)
         new_data_found = False
@@ -189,22 +202,41 @@ def process_items_until_done(driver, save_path):
                             links[0].click()
                             # 等待页面加载完成
                             wait_for_page_load(driver)
-                            # save_pdf(driver, save_path, f"{title}.pdf")
-                            save_pdf_by_cdp(driver, save_path, f"{title}.pdf")
+                            save_pdf_by_cdp(driver, save_path, f"{title}")
                             new_data_found = True
                         else:
                             print(f"{title}, 纯标题，无链接")
                     else:
                         print("文件已处理，跳过！")
                     file_index += 1
+                else:
+                    print(f"title: {title} 已维护碰撞 {collision_counter} 次")
+                    collision_counter += 1
+                    scroll_tree_to_under(driver)
+                    continue  # 继续处理下一个元素
         except StaleElementReferenceException:
-            # 元素过期，重新获取 items
-            items = get_items(driver)
             continue  # 继续处理下一个元素
 
         if not new_data_found:
             break  # 如果没有发现新数据，说明已经到达底部
 
+        if collision_counter > 5:
+            print("以碰撞至少3次, 判断执行完成")
+            # 获取最后一个元素
+            items = get_items(driver)
+            # 下载最后一个
+            item = items[len(items) - 1].find_element()
+            title = item.find_element(By.CLASS_NAME, "catalogTreeItem-module_title_snpKw").text
+            links = item.find_elements(By.TAG_NAME, "a")
+            if links:
+                print(f"处理: {title}")
+                links[0].click()
+                # 等待页面加载完成
+                wait_for_page_load(driver)
+                save_pdf_by_cdp(driver, save_path, f"{title}")
+            else:
+                print(f"{title}, 纯标题，无链接")
+            break
         time.sleep(1)  # 增加等待时间，确保数据加载
 
     print("处理完成，没有更多数据。")
