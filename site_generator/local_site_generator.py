@@ -61,6 +61,7 @@ html_template = """
         ul {{
             list-style-type: none;
             padding: 0;
+            font-size: 12px;
         }}
         ul .folder-item > .folder-name {{
             cursor: pointer;
